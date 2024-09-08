@@ -46,5 +46,6 @@ upsample = int(np.ceil(np.sum(y.label==2)/np.sum(x.label==2)))-1
 df = pd.concat([x,y]+[x[x['label'] == 2]]*upsample)
 df['sex'] = pd.Categorical(df['sex']).codes
 df['anatom_site_general_challenge'] = pd.Categorical(df['anatom_site_general_challenge']).codes
+df['label'] = df['label'].astype(int)
 
 df.to_csv('../../data/combined_train_cdeotte_nevi_meta.csv', index=False)
