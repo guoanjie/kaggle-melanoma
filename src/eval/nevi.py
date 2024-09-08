@@ -23,7 +23,7 @@ df = pd.DataFrame({
     })
 df['image_name'] = [_.replace('.jpg','') for _ in df.image_id]
 
-train_df = pd.read_csv('../../data/train.csv')
+train_df = pd.read_csv('../../data/siim-isic-melanoma-classification/train.csv')
 train_df = train_df.merge(df, on='image_name')
 
 known_nevi = train_df[train_df['diagnosis'] == 'nevus']
