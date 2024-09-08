@@ -11,7 +11,7 @@ dataset:
     verbose: true
     square: true
     square_tta: 10
-  data_dir: ../data/train-512/
+  data_dir: ../data/siim-isic-melanoma-classification/jpeg/train/
 
 
 transform:
