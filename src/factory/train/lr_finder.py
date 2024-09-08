@@ -61,7 +61,8 @@ class LRFinder(Step):
                  cutmix=None,
                  fmix=None,
                  cutmixup=None,
-                 cuda=True,
+                 cuda=torch.cuda.is_available(),
+                 mps=torch.backends.mps.is_available(),
                  amp=False):
 
         super(LRFinder, self).__init__(loader=loader)
@@ -79,10 +80,12 @@ class LRFinder(Step):
         self.fmix = fmix
         self.cutmixup = cutmixup
         self.cuda = cuda
+        self.mps = mps
         self.amp = amp
         if self.amp:
             assert MPL_AVAIL
             self.scaler = GradScaler()
+        self.grid_mask = False
 
 
     def find_lr(
@@ -138,7 +141,7 @@ class LRFinder(Step):
         for iteration in tqdm(range(num_iter)):
             # Get a new set of inputs and labels
             self.train_step()
-            loss = self.loss_tracker.losses[-1]
+            loss = self.loss_tracker.losses["loss"][-1]
 
             # Update the learning rate
             lr_schedule.step()
