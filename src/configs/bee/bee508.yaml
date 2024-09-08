@@ -14,7 +14,7 @@ dataset:
   inner_fold: 0
   outer_fold: 0
   outer_only: true
-  data_dir: [../data/isic2019/ISIC_2019_Training_Input, ../data/jpeg/train/]
+  data_dir: [../data/isic2019/ISIC_2019_Training_Input, ../data/siim-isic-melanoma-classification/jpeg/train/]
   csv_filename: ../data/combined_train_cdeotte_nevi_meta.csv
 
 
@@ -55,12 +55,12 @@ train:
   batch_size: 64
   trainer: Trainer
   params:
-    gradient_accumulation: 1
+    gradient_accumulation: 4
     num_epochs: 6
     steps_per_epoch: 0
     validate_interval: 2
     verbosity: 100
-    amp: true
+    amp: false
 
 
 evaluation:
