@@ -531,7 +531,11 @@ def predict(args, cfg):
         weights = torch.load(checkpoint, map_location=lambda storage, loc: storage)
         weights = {k.replace('module.', '') : v for k,v in weights.items()}
         model.load_state_dict(weights)
-        model = model.eval().cuda()
+        model = model.eval()
+        if torch.cuda.is_available():
+            model = model.cuda()
+        if torch.backends.mps.is_available():
+            model.to("mps")
         return model
 
     models = [create_model(model_cfg) for ind, model_cfg in enumerate(model_configs)]
