@@ -55,12 +55,12 @@ train:
   batch_size: 64
   trainer: Trainer
   params:
-    gradient_accumulation: 1
+    gradient_accumulation: 4
     num_epochs: 40
     steps_per_epoch: 0
     validate_interval: 8
     verbosity: 100
-    amp: true
+    amp: false
 
 
 evaluation:

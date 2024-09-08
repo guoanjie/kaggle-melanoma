@@ -9,7 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from tqdm import tqdm
 from .metrics import *
-from ..data import cudaify
+from ..data import cudaify, mpsify
 
 
 class Predictor(object):
@@ -18,7 +18,8 @@ class Predictor(object):
     def __init__(self,
                  loader,
                  labels_available=True,
-                 cuda=True,
+                 cuda=torch.cuda.is_available(),
+                 mps=torch.backends.mps.is_available(),
                  debug=False,
                  arc_loader=None):
 
@@ -26,6 +27,7 @@ class Predictor(object):
         self.arc_loader = arc_loader
         self.labels_available = labels_available
         self.cuda = cuda
+        self.mps = mps
         self.debug = debug
 
         if self.loader.dataset.square_tta:
@@ -55,6 +57,8 @@ class Predictor(object):
                     batch, labels = data
                     if self.cuda:
                         batch, labels = cudaify(batch, labels)
+                    if self.mps:
+                        batch, labels = mpsify(batch, labels)
                     # Get feature
                     melanoma += [model(batch).cpu().numpy()]
                 for i, data in tqdm(enumerate(self.loader), total=len(self.loader)):
@@ -65,6 +69,8 @@ class Predictor(object):
                     batch, labels = data 
                     if self.cuda: 
                         batch, labels = cudaify(batch, labels)
+                    if self.mps:
+                        batch, labels = mpsify(batch, labels)
                     features += [model(batch).cpu().numpy()]
                     losses += [0]
                     y_true += list(labels.cpu().numpy())
@@ -90,6 +96,8 @@ class Predictor(object):
                     batch, labels = data
                     if self.cuda:
                         batch, labels = cudaify(batch, labels)
+                    if self.mps:
+                        batch, labels = mpsify(batch, labels)
                     # Get feature
                     melanoma += [model.extract_features(batch)]
                 for i, data in tqdm(enumerate(self.loader), total=len(self.loader)):
@@ -100,6 +108,8 @@ class Predictor(object):
                     batch, labels = data 
                     if self.cuda: 
                         batch, labels = cudaify(batch, labels)
+                    if self.mps:
+                        batch, labels = mpsify(batch, labels)
                     features += [model.extract_features(batch)]
                     losses += [0]
                     y_true += list(labels.cpu().numpy())
@@ -125,6 +135,8 @@ class Predictor(object):
                     batch, labels = data
                     if self.cuda:
                         batch, labels = cudaify(batch, labels)
+                    if self.mps:
+                        batch, labels = mpsify(batch, labels)
                     output = model(batch)
                     if criterion:
                         if 'onehot' in str(criterion).lower():
@@ -167,13 +179,15 @@ class Evaluator(Predictor):
                  save_best,
                  early_stopping=np.inf,
                  thresholds=np.arange(0.05, 1.05, 0.05),
-                 cuda=True,
+                 cuda=torch.cuda.is_available(),
+                 mps=torch.backends.mps.is_available(),
                  debug=False,
                  arc_loader=None):
         
         super(Evaluator, self).__init__(
             loader=loader, 
             cuda=cuda,
+            mps=mps,
             debug=debug,
             arc_loader=arc_loader)
 

@@ -23,7 +23,7 @@ except ImportError:
 from tqdm import tqdm
 from torch.utils import data
 
-from ..data.utils import cudaify, _isnone
+from ..data.utils import cudaify, mpsify, _isnone
 from ..models import *
 from .fmix import fmix_apply
 from .cutmix import cutmix_apply
@@ -108,6 +108,8 @@ class Step(object):
 
         if self.cuda:
             batch, labels = cudaify(batch, labels)
+        if self.mps:
+            batch, labels = mpsify(batch, labels)
 
         mixaug = []
         if not _isnone(self.cutmix): mixaug.append('cutmix')
@@ -270,15 +272,14 @@ class Step(object):
                     loss = self.criterion(output, 
                         self._separate_batch(labels, splits[i]))                    
                 else:
-                    loss = self.criterion(output, 
-                        {k : v[splits[i]] for k,v in labels.items()})
+                    loss = self.criterion(output, labels[splits[i]])
                 tracker_loss += loss.item()
                 if i < (self.gradient_accumulation - 1):
                     retain = True
                 else:
                     retain = False
                 (loss / self.gradient_accumulation).backward()#retain_graph=retain) 
-            self.loss_tracker.set_loss(tracker_loss / self.gradient_accumulation)
+            self.loss_tracker.set_loss({'loss': tracker_loss / self.gradient_accumulation})
 
         step_start = time.time()
         loss = self.optimizer.step(closure=closure)
@@ -385,7 +386,8 @@ class Trainer(Step):
         self.steps_per_epoch = len(self.loader) if steps_per_epoch == 0 else steps_per_epoch
         self.validate_interval = validate_interval
         self.mixup = mixup
-        self.cuda = True
+        self.cuda = torch.cuda.is_available()
+        self.mps = torch.backends.mps.is_available()
 
         self.total_steps = self.steps_per_epoch * self.num_epochs
         self.steps = 0 

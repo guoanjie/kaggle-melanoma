@@ -116,7 +116,7 @@ def main():
     # We will set all the seeds we can, in vain ...
     set_reproducibility(cfg['seed'])
     # Set GPU
-    if len(args.gpu) == 1:
+    if len(args.gpu) == 1 and torch.cuda.is_available():
         torch.cuda.set_device(args.gpu[0])
 
     if 'predict' in args.mode:
@@ -277,7 +277,11 @@ def setup(args, cfg, train_df, valid_df):
     if 'pretrained' in cfg['model']['params'].keys():
         logger.info('  Pretrained weights : {}'.format(cfg['model']['params']['pretrained']))
     model = builder.build_model(cfg['model']['name'], cfg['model']['params'])
-    model = model.train().cuda()
+    model = model.train()
+    if torch.cuda.is_available():
+        model = model.cuda()
+    if torch.backends.mps.is_available():
+        model.to("mps")
 
     if cfg['loss']['params'] is None:
         cfg['loss']['params'] = {}
@@ -304,7 +308,7 @@ def setup(args, cfg, train_df, valid_df):
         optimizer, 
         cfg=cfg)
 
-    if len(args.gpu) > 1:
+    if len(args.gpu) > 1 and torch.cuda.is_available():
         print(f'DEVICES : {args.gpu}')
         model = nn.DataParallel(model, device_ids=args.gpu)
         if args.gpu[0] != 0:
