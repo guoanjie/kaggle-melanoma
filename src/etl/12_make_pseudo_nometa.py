@@ -6,10 +6,10 @@ def load_pickle(fp):
     with open(fp, 'rb') as f:
         return pickle.load(f)
 
-df = pd.read_csv('../../data/test_with_meta.csv')
+df = pd.read_csv('../../data/siim-isic-melanoma-classification/test.csv')
 
 x = load_pickle('../../lb-predictions/bee508_5fold.pkl')
-for i in dfs:
+for i in [df]:
     assert np.mean(i.image_name.apply(lambda s: s+'.jpg').values == np.asarray(x['image_id'])) == 1
 
 x = np.asarray(x['label'])
