@@ -19,13 +19,13 @@ try:
     from .factory import train as factory_train
     from .factory import evaluate as factory_evaluate
     from .factory import builder 
-    from .factory.data.utils import cudaify
+    from .factory.data.utils import cudaify, mpsify
 except:
     from factory import set_reproducibility
     import factory.train as factory_train
     import factory.evaluate as factory_evaluate
     import factory.builder as builder
-    from factory.data.utils import cudaify
+    from factory.data.utils import cudaify, mpsify
 
 
 def parse_args():
@@ -633,7 +633,11 @@ def predict_kfold(args, cfg):
         weights = torch.load(checkpoint, map_location=lambda storage, loc: storage)
         weights = {k.replace('module.', '') : v for k,v in weights.items()}
         model.load_state_dict(weights)
-        model = model.eval().cuda()
+        model = model.eval()
+        if torch.cuda.is_available():
+            model = model.cuda()
+        if torch.backends.mps.is_available():
+            model.to("mps")
         return model
 
     models = [create_model(model_cfg, ckpt) for ckpt in cfg['model_checkpoints']]
@@ -642,7 +646,10 @@ def predict_kfold(args, cfg):
     final_preds = []
     for batch, labels in tqdm(loader):
         model_preds = []
-        batch, labels = cudaify(batch, labels)
+        if torch.cuda.is_available():
+            batch, labels = cudaify(batch, labels)
+        if torch.backends.mps.is_available():
+            batch, labels = mpsify(batch, labels)
         for m in models:
             with torch.no_grad():
                 output = m(batch)

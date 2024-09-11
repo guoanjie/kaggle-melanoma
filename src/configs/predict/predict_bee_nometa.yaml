@@ -11,8 +11,8 @@ dataset:
     verbose: true
     square: true
     square_tta: 10
-  data_dir: ../data/jpeg/test/
-  csv_filename: ../data/test_with_meta.csv
+  data_dir: ../data/siim-isic-melanoma-classification/jpeg/test/
+  csv_filename: ../data/siim-isic-melanoma-classification/test.csv
 
 predict:
   savefile:
