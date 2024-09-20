@@ -14,4 +14,4 @@ python run.py configs/predict/predict_bee_nometa.yaml predict_kfold \
     --gpu 0 --backbone tf_efficientnet_b6_ns \
     --model-config configs/bee/bee608.yaml \
     --checkpoint-dir ../checkpoints/bee608/tf_efficientnet_b6_ns/ \
-    --save-file ../lb-predictions/bee568_5fold.pkl --num-workers 4
+    --save-file ../lb-predictions/bee608_5fold.pkl --num-workers 4
