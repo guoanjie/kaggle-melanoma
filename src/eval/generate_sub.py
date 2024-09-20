@@ -39,7 +39,7 @@ files = [
 ]
 
 df = pd.concat([get_df(_).target for _ in files], axis=1)
-df.columns = [_.split('/')[-1].replace('_5fold.pkl', '') for _ in df_list]
+df.columns = [_.split('/')[-1].replace('_5fold.pkl', '') for _ in files]
 df.to_csv('final_submission.csv', index=False)
 
 
